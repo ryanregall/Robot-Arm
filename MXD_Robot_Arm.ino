@@ -1,12 +1,3 @@
-/*
- Controlling a servo position using a potentiometer (variable resistor)
- by Michal Rinott <http://people.interaction-ivrea.it/m.rinott>
-
- modified on 8 Nov 2013
- by Scott Fitzgerald
- http://www.arduino.cc/en/Tutorial/Knob
-*/
-
 #include <Servo.h>
 
 Servo base;
@@ -19,14 +10,21 @@ int joy1x = A1;
 int joy1y = A0;
 int joy2x = A3;
 int joy2y = A2;
+int joy1sw = 2;
 
 int swivel = 0;
 int arms = 0;
+int motor = 0;
 
 int j1x;
 int j1y;
 int j2x;
 int j2y;
+
+int buttonState;             // the current reading from the input pin
+int lastButtonState = HIGH;   // the previous reading from the input pin
+unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+unsigned long debounceDelay = 100;    // the debounce time; increase if the output flickers
 
 void setup() {
   base.attach(6);
@@ -39,6 +37,7 @@ void setup() {
   pinMode(joy1y, INPUT);
   pinMode(joy2x, INPUT);
   pinMode(joy2y, INPUT);
+  pinMode(joy1sw, INPUT);
 
   base.write(90);     
   delay(250); 
@@ -51,7 +50,7 @@ void setup() {
   gripper.write(90);           
   delay(1000); 
 
- // Serial.begin(9600);
+//  Serial.begin(9600);
 }
 
 void loop() {
@@ -59,12 +58,10 @@ void loop() {
 //  val = map(val, 0, 1023, 0, 180);     // scale it to use it with the servo (value between 0 and 180)
 
   joypoll();
-//  joyreport();
+  //joyreport();
   joymap();
-  base.write(swivel);
-  armone.write(arms);
-  armtwo.write(arms);
-  armthree.write(arms);
+  changeMotor();
+ motorWrite();
 }
 
 void joypoll(){
@@ -87,5 +84,69 @@ void joyreport(){
 
 void joymap() {
   swivel = map(j1x, 0, 1023, 0, 180);
-  arms = map(j2y, 0, 1023, 40, 140);
+  arms = map(j2y, 0, 1023, 0, 180);
+  Serial.println(arms);
+}
+
+void motorWrite() {
+ if (motor == 1){
+  base.write(arms);
+ }
+ if (motor == 2){
+  armone.write(arms);
+ }
+ if (motor == 3){
+  armtwo.write(arms);
+ }
+ if (motor == 4){
+  armthree.write(arms);
+ }
+ if (motor == 5){
+    if (arms > 91){
+    arms = 90;
+  }
+  gripper.write(arms);
+ }
+}
+
+void changeMotor() {
+      // read the state of the switch into a local variable:
+  int reading = digitalRead(joy1sw);
+
+  // check to see if you just pressed the button
+  // (i.e. the input went from LOW to HIGH), and you've waited long enough
+  // since the last press to ignore any noise:
+
+  // If the switch changed, due to noise or pressing:
+  if (reading != lastButtonState) {
+    // reset the debouncing timer
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    // whatever the reading is at, it's been there for longer than the debounce
+    // delay, so take it as the actual current state:
+
+    // if the button state has changed:
+    if (reading != buttonState) {
+      buttonState = reading;
+
+      // only toggle the LED if the new button state is HIGH
+      if (buttonState == LOW) {
+        motor = motor + 1;
+        if (motor > 5) {
+          motor = 1;
+        }
+      }
+    }
+  }
+
+
+  // save the reading. Next time through the loop, it'll be the lastButtonState:
+  lastButtonState = reading;
+ // Serial.println("");
+// Serial.print("Motor: ");
+//  Serial.println(motor);
+//  Serial.println(buttonState);
+ // delay(1000);
 }
