@@ -84,13 +84,14 @@ void joyreport(){
 
 void joymap() {
   swivel = map(j1x, 0, 1023, 0, 180);
-  arms = map(j2y, 0, 1023, 0, 180);
+  arms = map(j2y, 0, 1023, 0, 165);
   Serial.println(arms);
 }
 
 void motorWrite() {
+base.write(swivel);
  if (motor == 1){
-  base.write(arms);
+  motor = 2;
  }
  if (motor == 2){
   armone.write(arms);
