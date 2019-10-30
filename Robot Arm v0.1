@@ -21,9 +21,9 @@ int j1y;
 int j2x;
 int j2y;
 
-int buttonState;             // the current reading from the input pin
-int lastButtonState = HIGH;   // the previous reading from the input pin
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+int buttonState;                      // the current reading from the input pin
+int lastButtonState = HIGH;           // the previous reading from the input pin
+unsigned long lastDebounceTime = 0;   // the last time the output pin was toggled
 unsigned long debounceDelay = 100;    // the debounce time; increase if the output flickers
 
 void setup() {
@@ -54,14 +54,11 @@ void setup() {
 }
 
 void loop() {
-//  val = analogRead(potpin);            // reads the value of the potentiometer (value between 0 and 1023)
-//  val = map(val, 0, 1023, 0, 180);     // scale it to use it with the servo (value between 0 and 180)
-
   joypoll();
-  //joyreport();
+//joyreport();
   joymap();
   changeMotor();
- motorWrite();
+  motorWrite();
 }
 
 void joypoll(){
@@ -111,24 +108,24 @@ base.write(swivel);
 }
 
 void changeMotor() {
-      // read the state of the switch into a local variable:
+                                 // read the state of the switch into a local variable:
   int reading = digitalRead(joy1sw);
 
-  // check to see if you just pressed the button
-  // (i.e. the input went from LOW to HIGH), and you've waited long enough
-  // since the last press to ignore any noise:
+                                 // check to see if you just pressed the button
+                                 // (i.e. the input went from LOW to HIGH), and you've waited long enough
+                                 // since the last press to ignore any noise:
 
-  // If the switch changed, due to noise or pressing:
+                                 // If the switch changed, due to noise or pressing:
   if (reading != lastButtonState) {
-    // reset the debouncing timer
+                                 // reset the debouncing timer
     lastDebounceTime = millis();
   }
 
   if ((millis() - lastDebounceTime) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
+                                 // whatever the reading is at, it's been there for longer than the debounce
+                                 // delay, so take it as the actual current state:
 
-    // if the button state has changed:
+                                 // if the button state has changed:
     if (reading != buttonState) {
       buttonState = reading;
 
@@ -144,9 +141,5 @@ void changeMotor() {
 
   // save the reading. Next time through the loop, it'll be the lastButtonState:
   lastButtonState = reading;
- // Serial.println("");
-// Serial.print("Motor: ");
-//  Serial.println(motor);
-//  Serial.println(buttonState);
- // delay(1000);
+
 }
